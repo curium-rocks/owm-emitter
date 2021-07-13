@@ -1,4 +1,4 @@
-name: SerialEmitter CI
+name: OwmEmitter CI
 on:
   push:
   pull_request:
