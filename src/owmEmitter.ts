@@ -1,7 +1,22 @@
-import {DeltaPollingEmitter, ICommand, IDataEvent, IExecutionResult} from '@curium.rocks/data-emitter-base';
+import {DeltaPollingEmitter, ICommand, IDataEvent, IExecutionResult, ISettings, ITraceableAction} from '@curium.rocks/data-emitter-base';
+import { IPollingSettings } from '@curium.rocks/data-emitter-base/build/src/pollingEmitter';
 
-import {OwmClient} from '@curium.rocks/openweathermap-client';
+import {OneCallApiResponse, OwmClient} from '@curium.rocks/openweathermap-client';
 import axios from 'axios';
+
+/**
+ * 
+ * @param {Record<string, unknown>} obj
+ * @return {boolean} 
+ */
+export function hasLatLong (obj: Record<string, unknown>) : boolean {
+    return obj['lat'] != null && obj['lon'] != null;
+}
+
+export interface LatLong {
+    lat: number;
+    lon: number;
+}
 
 /**
  * Polls the OWM one call API, looks for changes, 
@@ -46,13 +61,16 @@ export class OwmEmitter extends DeltaPollingEmitter {
         });
     }
 
+    
     /**
      * 
      * @param {ICommand} command
      * @return {Promise<IExecutionResult>} 
      */
-    sendCommand(command: ICommand): Promise<IExecutionResult> {
-        return Promise.reject(new Error("Not implemented"));ß
+    sendCommand(    
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        command: ICommand): Promise<IExecutionResult> {
+        return Promise.reject(new Error("not implemented"));
     }
 
     /**
@@ -97,11 +115,34 @@ export class OwmEmitter extends DeltaPollingEmitter {
 
     /**
      * 
+     * @param {ISettings} settings 
+     */
+    public override async applySettings(settings: ISettings & ITraceableAction & IPollingSettings): Promise<IExecutionResult> {
+        const baseResult = await super.applySettings(settings);
+        if(!baseResult.success) return baseResult;
+        if(settings.additional != null) {
+            if(hasLatLong(settings.additional as Record<string, unknown>)) {
+                const pos:LatLong = settings.additional as LatLong;
+                this.setLatitude(pos.lat);
+                this.setLongitude(pos.lon);
+            }
+        }
+        return baseResult;
+    }
+
+    /**
+     * 
      * @param {IDataEvent} evt 
      * @return {boolean}
      */
     hasChanged(evt: IDataEvent): boolean {
-        return true;
+        if(this._lastDataEvent == null) return true;
+
+        const lastEvt:OneCallApiResponse = this._lastDataEvent?.data as OneCallApiResponse;
+        const newEvt:OneCallApiResponse = evt.data as OneCallApiResponse;
+
+        // use the timestamp field to check for updates
+        return lastEvt.current.dt != newEvt.current.dt;
     }
 
 }
