@@ -1,4 +1,4 @@
-import {ICommand, IExecutionResult, PollingEmitter} from '@curium.rocks/data-emitter-base';
+import {DeltaPollingEmitter, ICommand, IDataEvent, IExecutionResult} from '@curium.rocks/data-emitter-base';
 
 import {OwmClient} from '@curium.rocks/openweathermap-client';
 import axios from 'axios';
@@ -7,7 +7,8 @@ import axios from 'axios';
  * Polls the OWM one call API, looks for changes, 
  * and emits an event on change.
  */
-export class OwmEmitter extends PollingEmitter {
+export class OwmEmitter extends DeltaPollingEmitter {
+
     private readonly owmClient: OwmClient;
     private readonly appId: string;
 
@@ -15,11 +16,28 @@ export class OwmEmitter extends PollingEmitter {
     private longitude: number;
 
 
-    constructor(id: string, name: string, description: string, checkInterval: number, appid: string) {
+    /**
+     * 
+     * @param {string} id 
+     * @param {string} name 
+     * @param {string} description 
+     * @param {number} checkInterval 
+     * @param {string} appid 
+     * @param {number} lat
+     * @param {number} lon
+     */
+    constructor(id: string, name: string, description: string, checkInterval: number, appid: string, lat: number, lon: number) {
         super(id, name, description, checkInterval);
+        this.latitude = lat;
+        this.longitude = lon;
+        this.appId = appid;
         this.owmClient = new OwmClient(axios);
     }
 
+    /**
+     * 
+     * @return {Promise<unknown>}
+     */
     async poll(): Promise<unknown> {
         return this.owmClient.onecall.getData({
             lat: this.latitude,
@@ -28,17 +46,26 @@ export class OwmEmitter extends PollingEmitter {
         });
     }
 
+    /**
+     * 
+     * @param {ICommand} command
+     * @return {Promise<IExecutionResult>} 
+     */
     sendCommand(command: ICommand): Promise<IExecutionResult> {
-        throw new Error('Method not implemented.');
+        return Promise.reject(new Error("Not implemented"));ß
     }
 
+    /**
+     * 
+     * @return {unknown}
+     */
     getMetaData(): unknown {
         return undefined;
     }
 
     /**
      * Set the latitude for the area of interest for weather
-     * @param latitude 
+     * @param {number} latitude 
      */
     setLatitude(latitude: number) : void {
         this.latitude = latitude;
@@ -46,7 +73,7 @@ export class OwmEmitter extends PollingEmitter {
     
     /**
      * 
-     * @returns latitude of the AOI for weather
+     * @return {number} latitude of the AOI for weather
      */
     getLatitude(): number {
         return this.latitude;
@@ -54,7 +81,7 @@ export class OwmEmitter extends PollingEmitter {
 
     /**
      * 
-     * @param longitude set the longitude for the AOI for weather
+     * @param {number} longitude set the longitude for the AOI for weather
      */
     setLongitude(longitude: number) : void {
         this.longitude = longitude;
@@ -62,10 +89,19 @@ export class OwmEmitter extends PollingEmitter {
     
     /**
      * 
-     * @returns longitude of the AOI
+     * @return {number} longitude of the AOI
      */
     getLongitude() : number {
         return this.longitude;
+    }
+
+    /**
+     * 
+     * @param {IDataEvent} evt 
+     * @return {boolean}
+     */
+    hasChanged(evt: IDataEvent): boolean {
+        return true;
     }
 
 }
