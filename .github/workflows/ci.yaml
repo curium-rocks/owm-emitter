@@ -19,7 +19,7 @@ jobs:
     - run: npm run build
     - run: npm run test
       env:
-        OWM_TOKEN: ${{ secrets.OWM_TOKEN}}
+        OWM_API_KEY: ${{ secrets.OWM_API_KEY}}
     - if: ${{ github.actor != 'dependabot[bot]' }}
       name: qube scan
       run: npm run sonarscan
