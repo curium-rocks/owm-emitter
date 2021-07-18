@@ -18,6 +18,43 @@ export interface LatLong {
     lon: number;
 }
 
+export interface OwmEmitterOptions {
+    /**
+     * Unique identifier for the emitter
+     */
+    id: string;
+    /**
+     * Useful name of the emitter
+     */
+    name: string;
+    /**
+     * Full description of the emitter
+     */
+    description: string;
+    /**
+     * How often to check the owm one call api for new data, do not set
+     * this higher than your allowable call rates
+     */
+    checkInterval: number;
+    /**
+     * Your OWM App ID
+     */
+    appId: string;
+    /**
+     * The latitude of the targeted area
+     */
+    latitude: number;
+    /**
+     * The longitude of the targeted area
+     */
+    longitude: number;
+    /**
+     * The amount of milliseconds without receiving a message, that triggers the emitter
+     * being considered disconnected.
+     */
+    dcThresholdMs?: number;
+}
+
 /**
  * Polls the OWM one call API, looks for changes, 
  * and emits an event on change.
@@ -32,21 +69,18 @@ export class OwmEmitter extends DeltaPollingEmitter {
 
 
     /**
-     * 
-     * @param {string} id 
-     * @param {string} name 
-     * @param {string} description 
-     * @param {number} checkInterval 
-     * @param {string} appid 
-     * @param {number} lat
-     * @param {number} lon
+     *
+     * @param {OwmEmitterOptions} options
      */
-    constructor(id: string, name: string, description: string, checkInterval: number, appid: string, lat: number, lon: number) {
-        super(id, name, description, checkInterval);
-        this.latitude = lat;
-        this.longitude = lon;
-        this.appId = appid;
+    constructor(options:OwmEmitterOptions) {
+        super(options.id, options.name, options.description, options.checkInterval);
+        this.latitude = options.latitude;
+        this.longitude = options.longitude;
+        this.appId = options.appId;
         this.owmClient = new OwmClient(axios);
+        if(options.dcThresholdMs != null) {
+            this.setDCCheckInterval(options.dcThresholdMs*3, options.dcThresholdMs);
+        }
     }
 
     /**
@@ -145,4 +179,11 @@ export class OwmEmitter extends DeltaPollingEmitter {
         return lastEvt.current.dt != newEvt.current.dt;
     }
 
+    /**
+     * Get the emitter type
+     * @return {string}
+     */
+    public getType(): string {
+        return "OwmEmitter";
+    }
 }
