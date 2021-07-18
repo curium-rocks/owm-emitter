@@ -150,11 +150,11 @@ describe( 'OwmEmitter', function() {
                     emitCount++;
                 })
                 emitter.startPolling();
-                await sleep(2000);
+                await sleep(3000);
                 expect(emitCount).to.be.greaterThan(0);
                 emitter.stopPolling();
                 emitCount = 0;
-                await sleep(2000);
+                await sleep(3000);
                 emitter.dispose();
                 expect(emitCount).to.be.eq(0);
             } finally {
@@ -168,10 +168,10 @@ describe( 'OwmEmitter', function() {
                 emitter.onData((evt) => {
                     emitCount++;
                 })
-                await sleep(2000);
+                await sleep(3000);
                 expect(emitCount).to.be.eq(0);
                 emitter.startPolling();
-                await sleep(2000);
+                await sleep(3000);
                 expect(emitCount).to.be.greaterThan(0);
             } finally {
                 emitter.dispose();
