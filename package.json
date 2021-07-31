@@ -40,7 +40,7 @@
     "mocha": "^8.3.2",
     "nyc": "^15.1.0",
     "sonarqube-scanner": "^2.8.0",
-    "ts-node": "^9.1.1",
+    "ts-node": "^10.0.0",
     "typedoc": "^0.21.2",
     "typemoq": "^2.1.0",
     "typescript": "^4.2.4"
