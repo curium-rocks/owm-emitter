@@ -60,7 +60,7 @@ export interface OwmEmitterOptions {
  * and emits an event on change.
  */
 export class OwmEmitter extends DeltaPollingEmitter {
-
+    public static readonly TYPE = 'OWM-EMITTER';
     private readonly owmClient: OwmClient;
     private readonly appId: string;
 
@@ -113,6 +113,18 @@ export class OwmEmitter extends DeltaPollingEmitter {
      */
     getMetaData(): unknown {
         return undefined;
+    }
+
+    /**
+     * @return {unknown}
+     */
+    getEmitterProperties(): unknown {
+        return {
+            appId: this.appId,
+            latitude: this.getLatitude(),
+            longitude: this.getLongitude(),
+            checkInterval: this._interval
+        }
     }
 
     /**
@@ -184,6 +196,6 @@ export class OwmEmitter extends DeltaPollingEmitter {
      * @return {string}
      */
     public getType(): string {
-        return "OwmEmitter";
+        return OwmEmitter.TYPE;
     }
 }
