@@ -62,6 +62,6 @@
   "dependencies": {
     "@curium.rocks/data-emitter-base": "^0.1.1-alpha.35",
     "@curium.rocks/openweathermap-client": "^0.1.1-alpha.5",
-    "axios": "^0.21.1"
+    "axios": "^0.22.0"
   }
 }
